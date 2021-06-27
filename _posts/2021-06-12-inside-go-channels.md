@@ -1,13 +1,20 @@
+---
 layout: post
-title: "Inside go channels"
-date: 2021-06-12 19:00:00 -0000
+title: Inside go channels
 categories: Go
+---
 
-# Inside Go Channels
+## Why
+
+Chanenls are an integral part of Go's concurrency primitives, together with goroutines. There is a famous slogan from [Effective Go](https://golang.org/doc/effective_go#sharing):
+
+> Do not communicate by sharing memory; instead, share memory by communicating.
+
+and channels is how you communicate in Go. Go's approach to concurrency is my personal favorite, as 
 
 ## Where
 
-Channel is implemented in `runtime/chan.go`[^1]. You can find the definition of channel(`hchan`), and the the implementation of channel operations there. GitHub link [here](https://github.com/golang/go/blob/go1.14.2/src/runtime/chan.go).
+The type underlying all channel types in Go is `hchan` (in `runtime/chan.go`[^1]). You can find the definition of `hchan` and the implementation of channel operations there. GitHub link [here](https://github.com/golang/go/blob/go1.14.2/src/runtime/chan.go).
 
 ## What
 
@@ -72,7 +79,7 @@ I added "roughly speaking" because sending and receiving can either block or not
 
 Next, we will be looking inside the 4 functions and learn about the internal working of Go channels.
 
-### `makechan`
+### Create a new channel - `makechan`
 
 > The complete function signature: `func makechan(t *chantype, size int) *hchan`
 
@@ -131,7 +138,7 @@ This is what happened in `makechan`
 - `c.elemtype` is set to the element type of the channel type
 - `c.dataqsiz` is set to `size`
 
-### `chansend`
+### Send value to a channel - `chansend`
 
 > The complete function signature: `func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool`
 
@@ -385,7 +392,7 @@ Whew, so that is how sending to channel works under the hood. In summary, the wh
         - clean up the "waiting sender"
         - return `true`
 
-### `chanrecv`
+### Receive value from a channel - `chanrecv`
 
 > The complete function signature: `func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)`
 
@@ -438,7 +445,7 @@ The bad news is that it is as complicated as `chansend`, but the good news is, `
     - clean up the "waiting receiver"[^9]
     - return `selected=true` and `received=true`
 
-### `closechan`
+### Close a channel - `closechan`
 
 > The complete function signature: `func closechan(c *hchan)`
 
